@@ -1,34 +1,67 @@
 const express = require('express')
+const connection = require('./database/database')
+const perguntaModel = require('./database/Pergunta')
 const app = express()
+// const bodyParser = require('body-parser')
+
+connection
+  .authenticate()
+  .then(e => {
+    console.log('Conexao realizada')
+  })
+  .catch(e => {
+    console.log(e)
+  })
 
 // a template engine sera o ejs
 app.set('view engine', 'ejs')
 app.use(express.static('public/css'))
+// app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 app.get('/', (req, res) => {
-  res.render('index')
+  perguntaModel
+    .findAll({ raw: true, order: [['id', 'DESC']] })
+    .then(perguntas => {
+      res.render('index', {
+        perguntas: perguntas
+      })
+    })
 })
 
 app.get('/perguntar', (req, res) => {
   res.render('perguntar')
 })
 
-app.get('/foo', function (req, res) {
-  res.send('Hello world')
+app.post('/salvarpergunta', (req, res) => {
+  const titulo = req.body.titulo
+  const descricao = req.body.descricao
+  perguntaModel
+    .create({
+      titulo: titulo,
+      descricao: descricao
+    })
+    .then(e => {
+      res.redirect('/')
+    })
 })
 
-app.get('/git', (req, res) => {
-  res.send(
-    '<a href="https://www.github.com/lucascastrx" target="_blank" > Link github </a>'
-  )
-})
-
-app.get('/instagram/:user?', (req, res) => {
-  let name = req.query['name']
-
-  res.send(
-    `<a href="https://www.instagram.com/${req.params.user}" target="_blank"> ${name} </a>`
-  )
+app.get('/pergunta/:id', (req, res) => {
+  const id = req.params.id
+  perguntaModel
+    .findOne({
+      where: { id: id }
+    })
+    .then(pergunta => {
+      if (pergunta != undefined) {
+        res.render('pergunta', {
+          pergunta: pergunta
+        })
+      } else {
+        res.redirect('/')
+      }
+    })
 })
 
 app.listen(8080, function (e) {

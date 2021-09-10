@@ -7,14 +7,14 @@
         <h1>Perguntas</h1>
       </div>
       <div class="card-body">
-        <form method="POST">
+        <form action="/salvarpergunta" method="POST">
           <label for="titulo">Título</label>
           <input class="form-control" id="titulo" name="titulo" type="text" />
           <br />
           <textarea
             class="form-control"
-            name=""
-            id=""
+            name="descricao"
+            id="descricao"
             cols="30"
             rows="10"
             placeholder="Faça sua pergunta"
